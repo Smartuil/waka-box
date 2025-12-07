@@ -1,0 +1,28 @@
+name: Keep Alive
+
+on:
+  schedule:
+    # 每周一运行一次，保持仓库活跃
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Create keep-alive commit
+        run: |
+          # 更新一个时间戳文件
+          echo "Last active: $(date)" > .github/keep-alive.txt
+          
+          # 配置 Git
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # 提交更改
+          git add .github/keep-alive.txt
+          git commit -m "chore: keep repository active [skip ci]" || echo "No changes to commit"
+          git push origin HEAD:${{ github.ref }}
